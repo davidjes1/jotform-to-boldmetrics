@@ -1,0 +1,34 @@
+/* bm-style.css */
+.bm-result-container {
+padding: 20px;
+background: #f9f9f9;
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+max-width: 600px;
+margin: 20px auto;
+font-family: Arial, sans-serif;
+}
+
+
+.bm-result-container h2 {
+margin-bottom: 10px;
+font-size: 24px;
+font-weight: bold;
+}
+
+
+.bm-result-container p {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+
+.bm-error {
+color: #b00020;
+background: #ffe5e5;
+padding: 10px;
+border-radius: 8px;
+margin-top: 10px;
+font-weight: bold;
+}
+

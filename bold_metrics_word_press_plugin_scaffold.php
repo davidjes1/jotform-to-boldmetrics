@@ -253,21 +253,39 @@ final class BM_Integration {
         ob_start();
         echo '<div class="bm-result">';
         echo '<h3>Size Recommendations</h3>';
-        if ( ! empty( $response['good_matches'] ) ) {
+        
+        $recommendations = $response['size_recommendations'] ?? array();
+        $good_matches = $recommendations['good_matches'] ?? array();
+
+        if ( ! empty( $good_matches ) ) {
             echo '<ul class="bm-good-matches">';
-            foreach ( $response['good_matches'] as $match ) {
-                echo '<li>' . esc_html( $match['brand_size'] ?? $match['size'] ?? 'Size' ) . ' — score: ' . esc_html( $match['fit_score'] ?? '' ) . '</li>';
+            foreach ( $good_matches as $match ) {
+                $garment = $match['garment'] ?? array();
+                $brand = $garment['brand'] ?? '';
+                $size = $garment['size'] ?? 'Unknown Size';
+                $display_title = trim( "$brand $size" );
+                
+                $score_parts = array();
+                if ( ! empty( $match['fit_score'] ) && is_array( $match['fit_score'] ) ) {
+                    foreach ( $match['fit_score'] as $k => $v ) {
+                        $score_parts[] = "$k: $v";
+                    }
+                }
+                $score_str = ! empty( $score_parts ) ? ' (Score: ' . implode( ', ', $score_parts ) . ')' : '';
+
+                echo '<li>' . esc_html( $display_title . $score_str ) . '</li>';
             }
             echo '</ul>';
         } else {
             echo '<p>No recommended sizes returned.</p>';
         }
 
-        // Optionally print some predicted measurements (sample)
-        if ( ! empty( $response['predictions'] ) && is_array( $response['predictions'] ) ) {
+        // Optionally print some predicted measurements
+        $dimensions = $response['dimensions'] ?? array();
+        if ( ! empty( $dimensions ) && is_array( $dimensions ) ) {
             echo '<h4>Predicted Measurements</h4>';
             echo '<table class="bm-measurements"><tbody>';
-            foreach ( $response['predictions'] as $key => $val ) {
+            foreach ( $dimensions as $key => $val ) {
                 echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $val ) . '</td></tr>';
             }
             echo '</tbody></table>';

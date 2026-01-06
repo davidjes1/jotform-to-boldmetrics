@@ -14,12 +14,16 @@ function add_shortcode($tag, $callback)
 function register_activation_hook($file, $callback)
 {
 }
+$mock_wp_options = array();
 function get_option($option, $default = false)
 {
-    return $default;
+    global $mock_wp_options;
+    return isset($mock_wp_options[$option]) ? $mock_wp_options[$option] : $default;
 }
 function add_option($option, $value = '', $deprecated = '', $autoload = 'yes')
 {
+    global $mock_wp_options;
+    $mock_wp_options[$option] = $value;
 }
 function register_post_type($post_type, $args = array())
 {
@@ -100,8 +104,11 @@ function get_post_meta($post_id, $key = '', $single = false)
     }
     return $single ? '' : array();
 }
+$mock_remote_get_calls = array();
 function wp_remote_get($url, $args = array())
 {
+    global $mock_remote_get_calls;
+    $mock_remote_get_calls[] = array('url' => $url, 'args' => $args);
     return array();
 }
 function wp_remote_retrieve_response_code($response)
@@ -135,6 +142,15 @@ function wp_enqueue_style($handle, $src = '', $deps = array(), $ver = false, $me
 function wp_trim_words($text, $num_words = 55, $more = null)
 {
     return $text;
+}
+function add_query_arg($args, $url)
+{
+    if (strpos($url, '?') === false) {
+        $url .= '?';
+    } else {
+        $url .= '&';
+    }
+    return $url . http_build_query($args);
 }
 
 // Mock Classes

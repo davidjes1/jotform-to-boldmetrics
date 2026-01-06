@@ -1,0 +1,68 @@
+/* bm-style.css */
+.bm-result {
+padding: 20px;
+background: #f9f9f9;
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+max-width: 600px;
+margin: 20px auto;
+font-family: Arial, sans-serif;
+}
+
+.bm-result h3,
+.bm-result h4 {
+margin-bottom: 10px;
+font-size: 20px;
+font-weight: bold;
+color: #333;
+}
+
+.bm-result h4 {
+font-size: 18px;
+margin-top: 20px;
+}
+
+.bm-result p {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.bm-good-matches {
+list-style: none;
+padding: 0;
+margin: 10px 0;
+}
+
+.bm-good-matches li {
+padding: 10px;
+background: #fff;
+border-left: 4px solid #4CAF50;
+margin-bottom: 8px;
+border-radius: 4px;
+}
+
+.bm-measurements {
+width: 100%;
+border-collapse: collapse;
+margin-top: 10px;
+}
+
+.bm-measurements td {
+padding: 8px;
+border-bottom: 1px solid #ddd;
+}
+
+.bm-measurements td:first-child {
+font-weight: bold;
+width: 50%;
+}
+
+.bm-error {
+color: #b00020;
+background: #ffe5e5;
+padding: 10px;
+border-radius: 8px;
+margin-top: 10px;
+font-weight: bold;
+}
+

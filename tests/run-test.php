@@ -2,63 +2,44 @@
 // 1. Include the mock environment
 require_once __DIR__ . '/mock-wp.php';
 
-// 1.5 Define Constants (Simulate wp-config.php)
-define('BM_CLIENT_ID', 'united_shield');
-define('BM_USER_KEY', 'bc8c8d307c932d0ffbe2422ed0821711ff8e342917f86f6f');
+// 1.5 Load credentials from .env file
+$envFile = __DIR__ . '/.env';
+if (!file_exists($envFile)) {
+    die("ERROR: tests/.env file not found. Copy tests/.env.example and add your credentials.\n");
+}
+$envVars = parse_ini_file($envFile);
+if (empty($envVars['BM_CLIENT_ID']) || empty($envVars['BM_USER_KEY'])) {
+    die("ERROR: BM_CLIENT_ID and BM_USER_KEY must be set in tests/.env\n");
+}
+define('BM_CLIENT_ID', $envVars['BM_CLIENT_ID']);
+define('BM_USER_KEY', $envVars['BM_USER_KEY']);
 
 // 2. Include the plugin file
 require_once __DIR__ . '/../bold_metrics_word_press_plugin_scaffold.php';
 
 // 3. Setup Mock Data
-// This matches the JSON provided by the user
-$json_response = '{
-"code": 200,
-"customer": {
-  "desired_brand": "farah",
-  "desired_garment_type": "t_shirt",
-  "height": 72.00,
-  "waist_circum_preferred": 30.00,
-  "weight": 150.00
-},
-"dimensions": {
-  "acromion_height": 58.57,
-  "acromion_radial_len": 13.40,
-  "acromion_radial_stylion_len": 24.19
-},
-"message": {
-  "overall": "OK"
-},
-"size_recommendations": {
-  "good_matches": [
-    {
-      "fit_description": {
-        "chest": "just right",
-        "garment": "just right"
-      },
-      "fit_score": {
-        "chest": 0.01,
-        "garment": 0.01
-      },
-      "garment": {
-        "brand": "farah",
-        "category": "shirt",
-        "fit": "",
-        "size": "s",
-        "style": "",
-        "type": "t_shirt"
-      }
-    }
-  ],
-  "poor_matches": []
-},
-"outlier": false,
-"outlier_messages": {
-  "overall": "All good",
-  "specifics": []
-}
-}';
-
-$decoded_response = json_decode($json_response, true);
+// This matches the structure expected by the shortcode (lines 284, 304 of plugin)
+$decoded_response = array(
+    'good_matches' => array(
+        array(
+            'brand_size' => 'Farah Small',
+            'size' => 'S',
+            'fit_score' => '95%'
+        ),
+        array(
+            'brand_size' => 'Farah Medium',
+            'size' => 'M',
+            'fit_score' => '88%'
+        )
+    ),
+    'predictions' => array(
+        'chest_circum' => 38.12,
+        'waist_circum' => 32.45,
+        'hip_circum' => 39.87,
+        'acromion_height' => 58.57,
+        'inseam' => 30.5
+    )
+);
 
 // Simulate saving this to Post Meta (Post ID 123)
 global $mock_post_meta;

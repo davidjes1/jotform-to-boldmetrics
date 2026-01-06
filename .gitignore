@@ -20,7 +20,10 @@ wordpress-latest.zip
 .env
 .env.*
 !.env.example
+tests/.env
 secrets.json
+*.key
+*.pem
 
 # OS Files
 .DS_Store

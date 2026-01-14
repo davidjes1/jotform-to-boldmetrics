@@ -40,8 +40,6 @@ final class BM_Integration
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         add_shortcode('boldmetrics_result', array(__CLASS__, 'shortcode_show_result'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
-        register_activation_hook(__FILE__, array(__CLASS__, 'on_activate'));
-        register_deactivation_hook(__FILE__, array(__CLASS__, 'on_deactivate'));
     }
 
     /**
@@ -405,6 +403,10 @@ final class BM_Integration
         wp_enqueue_style('bm-integration-style', plugin_dir_url(__FILE__) . 'assets/css/bm-style.css', array(), self::VERSION);
     }
 }
+
+// Register activation and deactivation hooks
+register_activation_hook(__FILE__, array('BM_Integration', 'on_activate'));
+register_deactivation_hook(__FILE__, array('BM_Integration', 'on_deactivate'));
 
 // Initialize the plugin
 BM_Integration::init();

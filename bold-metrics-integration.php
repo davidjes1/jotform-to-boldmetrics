@@ -41,6 +41,7 @@ final class BM_Integration
         add_shortcode('boldmetrics_result', array(__CLASS__, 'shortcode_show_result'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
         register_activation_hook(__FILE__, array(__CLASS__, 'on_activate'));
+        register_deactivation_hook(__FILE__, array(__CLASS__, 'on_deactivate'));
     }
 
     /**
@@ -61,6 +62,19 @@ final class BM_Integration
         if (false === get_option(self::OPTION_KEY)) {
             add_option(self::OPTION_KEY, $defaults);
         }
+    }
+
+    /**
+     * Plugin deactivation hook
+     * Flushes rewrite rules on plugin deactivation
+     */
+    public static function on_deactivate()
+    {
+        // Flush rewrite rules to clean up custom post type permalinks
+        flush_rewrite_rules();
+
+        // Note: We don't delete data on deactivation
+        // Data is only removed when plugin is deleted (see uninstall.php)
     }
 
     /**

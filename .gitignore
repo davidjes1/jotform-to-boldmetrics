@@ -92,3 +92,8 @@ local-config.php
 logs/
 error_log
 debug.log
+
+# Translation Files (keep .pot template, ignore generated files)
+*.mo
+*.pot~
+languages/*.po

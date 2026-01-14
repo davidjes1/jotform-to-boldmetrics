@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Add-Type -Assembly System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::OpenRead\\(\\(Resolve-Path ''../bold-metrics-integration.zip''\\).Path\\).Entries | Select-Object FullName | Format-Table -AutoSize\")",
+      "Bash(php -r:*)",
+      "Bash(powershell -Command \"Add-Type -Assembly System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::OpenRead\\(\\(Resolve-Path ''../bold-metrics-integration-test.zip''\\).Path\\).Entries | Select-Object FullName -First 10\")"
+    ]
+  }
+}

@@ -90,13 +90,7 @@ After activation, the plugin will:
 
 ### 3. CSS Assets
 
-The plugin expects CSS at `assets/css/bm-style.css`. To set this up:
-
-```bash
-cd /path/to/wordpress/wp-content/plugins/jotform-to-boldmetrics
-mkdir -p assets/css
-mv bm-style.css assets/css/
-```
+The plugin includes CSS at `assets/css/bm-style.css` which is automatically enqueued on the frontend when displaying results via shortcode.
 
 ## Usage
 
@@ -197,11 +191,15 @@ Where `123` is the post ID returned by the webhook endpoint.
 
 ```
 jotform-to-boldmetrics/
-├── bold_metrics_word_press_plugin_scaffold.php  # Main plugin file
-├── bm-style.css                                 # Styles (move to assets/css/)
+├── bold-metrics-integration.php                 # Main plugin file
+├── assets/
+│   └── css/
+│       └── bm-style.css                         # Plugin styles
+├── tests/                                       # Test files
 ├── CLAUDE.md                                    # Comprehensive documentation
 ├── README.md                                    # This file
-└── .git/                                        # Git repository
+├── TESTING.md                                   # Testing guide
+└── DEV-SETUP.md                                 # Development setup
 ```
 
 ### Key Components

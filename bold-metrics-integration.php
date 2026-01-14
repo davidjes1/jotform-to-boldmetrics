@@ -1,21 +1,37 @@
 <?php
 /**
  * Plugin Name: Bold Metrics Integration
+ * Plugin URI: https://github.com/davidjes1/jotform-to-boldmetrics
  * Description: Integrates JotForm submissions with the Bold Metrics Virtual Sizer API. Provides a REST endpoint for webhooks, admin settings for API keys, and a shortcode to display results.
  * Version: 0.1.0
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
  * Author: Jesse David
+ * Author URI: https://github.com/davidjes1
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: bold-metrics-integration
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+/**
+ * Main plugin class for Bold Metrics Integration
+ *
+ * Handles webhook processing, API integration, admin settings,
+ * and result display functionality.
+ */
 final class BM_Integration
 {
     const VERSION = '0.1.0';
     const OPTION_KEY = 'bm_integration_options';
 
+    /**
+     * Initialize the plugin by registering hooks
+     */
     public static function init()
     {
         add_action('init', array(__CLASS__, 'register_post_type'));
@@ -27,6 +43,10 @@ final class BM_Integration
         register_activation_hook(__FILE__, array(__CLASS__, 'on_activate'));
     }
 
+    /**
+     * Plugin activation hook
+     * Sets up default options and flushes rewrite rules
+     */
     public static function on_activate()
     {
         // Ensure CPT is registered on activation so rewrite rules are flushed cleanly.
@@ -43,6 +63,9 @@ final class BM_Integration
         }
     }
 
+    /**
+     * Register the custom post type for storing Bold Metrics results
+     */
     public static function register_post_type()
     {
         $labels = array(
@@ -61,6 +84,9 @@ final class BM_Integration
         register_post_type('bm_result', $args);
     }
 
+    /**
+     * Add admin menu page
+     */
     public static function add_admin_menu()
     {
         add_options_page(
@@ -72,6 +98,9 @@ final class BM_Integration
         );
     }
 
+    /**
+     * Register plugin settings
+     */
     public static function register_settings()
     {
         register_setting('bm_integration_group', self::OPTION_KEY, array(__CLASS__, 'sanitize_options'));
@@ -83,6 +112,12 @@ final class BM_Integration
         add_settings_field('bm_webhook_secret', 'Webhook Secret (optional)', array(__CLASS__, 'field_webhook_secret'), 'bm-integration', 'bm_main_section');
     }
 
+    /**
+     * Sanitize options before saving
+     *
+     * @param array $input Raw input from settings form
+     * @return array Sanitized options
+     */
     public static function sanitize_options($input)
     {
         $out = array();
@@ -92,6 +127,9 @@ final class BM_Integration
         return $out;
     }
 
+    /**
+     * Render Client ID field
+     */
     public static function field_client_id()
     {
         if (defined('BM_CLIENT_ID')) {
@@ -103,6 +141,9 @@ final class BM_Integration
         }
     }
 
+    /**
+     * Render User Key field
+     */
     public static function field_user_key()
     {
         if (defined('BM_USER_KEY')) {
@@ -116,6 +157,9 @@ final class BM_Integration
         }
     }
 
+    /**
+     * Render Webhook Secret field
+     */
     public static function field_webhook_secret()
     {
         $opts = get_option(self::OPTION_KEY);
@@ -123,6 +167,9 @@ final class BM_Integration
         echo '<p class="description">Optional shared secret to validate incoming webhooks from JotForm.</p>';
     }
 
+    /**
+     * Render the settings page
+     */
     public static function settings_page()
     {
         if (!current_user_can('manage_options')) {
@@ -146,6 +193,9 @@ final class BM_Integration
         <?php
     }
 
+    /**
+     * Register REST API routes
+     */
     public static function register_rest_routes()
     {
         register_rest_route('boldmetrics/v1', '/process', array(
@@ -155,6 +205,12 @@ final class BM_Integration
         ));
     }
 
+    /**
+     * Handle webhook requests from JotForm
+     *
+     * @param WP_REST_Request $request The REST request object
+     * @return WP_REST_Response Response object
+     */
     public static function handle_webhook(WP_REST_Request $request)
     {
         $opts = get_option(self::OPTION_KEY);
@@ -210,6 +266,12 @@ final class BM_Integration
         return new WP_REST_Response(array('ok' => true, 'post_id' => $post_id, 'response' => $result), 200);
     }
 
+    /**
+     * Call the Bold Metrics Virtual Sizer API
+     *
+     * @param array $data Measurement data to send to API
+     * @return array|WP_Error API response or error object
+     */
     public static function call_boldmetrics_api($data)
     {
         $opts = get_option(self::OPTION_KEY);
@@ -262,6 +324,12 @@ final class BM_Integration
         return $json;
     }
 
+    /**
+     * Shortcode to display Bold Metrics results
+     *
+     * @param array $atts Shortcode attributes
+     * @return string HTML output
+     */
     public static function shortcode_show_result($atts)
     {
         $atts = shortcode_atts(array('id' => 0), $atts, 'boldmetrics_result');
@@ -315,13 +383,14 @@ final class BM_Integration
         return ob_get_clean();
     }
 
+    /**
+     * Enqueue plugin CSS assets
+     */
     public static function enqueue_assets()
     {
-        wp_enqueue_style('bm-integration-style', plugin_dir_url(__FILE__) . 'assets/css/bm-style.css');
+        wp_enqueue_style('bm-integration-style', plugin_dir_url(__FILE__) . 'assets/css/bm-style.css', array(), self::VERSION);
     }
 }
 
+// Initialize the plugin
 BM_Integration::init();
-
-// Create a basic CSS file when plugin is first installed if it doesn't exist. This is optional – you can ship your own stylesheet with the plugin ZIP.
-// Developers: add an assets/css/bm-style.css file in the plugin folder for styling the shortcode output.

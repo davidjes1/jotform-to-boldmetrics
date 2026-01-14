@@ -241,7 +241,7 @@ Expected: 200 OK with valid response
 **Test API Call Directly:**
 ```bash
 php -r "
-include 'bold_metrics_word_press_plugin_scaffold.php';
+include 'bold-metrics-integration.php';
 \$data = array(
   'height' => 72,
   'weight' => 150,
@@ -298,7 +298,7 @@ var_dump(\$result);
 
 **Direct Access Prevention:**
 - [ ] Try accessing plugin file directly in browser:
-  `http://yoursite.com/wp-content/plugins/jotform-to-boldmetrics/bold_metrics_word_press_plugin_scaffold.php`
+  `http://yoursite.com/wp-content/plugins/jotform-to-boldmetrics/bold-metrics-integration.php`
 - [ ] Should show blank page or WordPress error (not plugin code)
 
 ---

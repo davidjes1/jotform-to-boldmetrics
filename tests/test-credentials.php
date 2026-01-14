@@ -3,7 +3,7 @@
 require_once __DIR__ . '/mock-wp.php';
 
 // Include the plugin file
-require_once __DIR__ . '/../bold_metrics_word_press_plugin_scaffold.php';
+require_once __DIR__ . '/../bold-metrics-integration.php';
 
 // Helper to reset mocks
 function reset_mocks()

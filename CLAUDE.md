@@ -20,21 +20,24 @@ This is a **WordPress plugin** that integrates JotForm form submissions with the
 
 ```
 jotform-to-boldmetrics/
-├── bold_metrics_word_press_plugin_scaffold.php  # Main plugin file
-├── bm-style.css                                 # Styling for results display
+├── bold-metrics-integration.php                 # Main plugin file
+├── assets/
+│   └── css/
+│       └── bm-style.css                         # Styling for results display
 └── .git/                                        # Git repository
 ```
 
 ### Key Files
 
-1. **bold_metrics_word_press_plugin_scaffold.php** (289 lines)
+1. **bold-metrics-integration.php** (~400 lines)
    - Main plugin entry point
    - Contains the `BM_Integration` class with all functionality
    - Handles WordPress hooks, REST API, admin UI, and API integration
+   - Includes comprehensive PHPDoc documentation
 
-2. **bm-style.css** (35 lines)
+2. **assets/css/bm-style.css** (35 lines)
    - Styles for the result display shortcode
-   - Note: Referenced in code as `assets/css/bm-style.css` but currently at root
+   - Located in proper assets directory structure
 
 ---
 
@@ -174,15 +177,7 @@ The webhook handler expects these POST parameters:
 
 ### CSS Asset Location
 
-**Important**: The plugin expects CSS at `assets/css/bm-style.css` (line 281) but the file is currently at the root as `bm-style.css`.
-
-**To fix**:
-```bash
-mkdir -p assets/css
-mv bm-style.css assets/css/
-```
-
-OR update line 281 to reference the correct path.
+The plugin expects CSS at `assets/css/bm-style.css` and it is properly located in the assets directory structure.
 
 ### Git Workflow
 
@@ -345,10 +340,28 @@ define('WP_DEBUG_DISPLAY', false);
 
 ## File Organization Best Practices
 
-### Recommended Structure (for future expansion)
+### Current Structure
 ```
 bold-metrics-integration/
-├── bold-metrics-integration.php      # Main plugin file (rename)
+├── bold-metrics-integration.php      # Main plugin file
+├── assets/
+│   └── css/
+│       └── bm-style.css              # Plugin styles
+├── tests/
+│   ├── run-test.php                   # Test runner
+│   ├── test-credentials.php           # Credential tests
+│   ├── mock-wp.php                    # Mock WordPress environment
+│   └── .env.example                   # Example credentials
+├── CLAUDE.md                          # This documentation
+├── README.md                          # User-facing readme
+├── TESTING.md                         # Testing guide
+└── DEV-SETUP.md                       # Development setup guide
+```
+
+### Future Expansion Structure
+```
+bold-metrics-integration/
+├── bold-metrics-integration.php      # Main plugin file
 ├── readme.txt                         # WordPress plugin readme
 ├── assets/
 │   ├── css/

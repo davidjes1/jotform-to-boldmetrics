@@ -15,7 +15,7 @@ define('BM_CLIENT_ID', $envVars['BM_CLIENT_ID']);
 define('BM_USER_KEY', $envVars['BM_USER_KEY']);
 
 // 2. Include the plugin file
-require_once __DIR__ . '/../bold_metrics_word_press_plugin_scaffold.php';
+require_once __DIR__ . '/../bold-metrics-integration.php';
 
 // 3. Setup Mock Data
 // This matches the structure expected by the shortcode (lines 284, 304 of plugin)

@@ -1,11 +1,605 @@
 /**
- * Bold Metrics Integration - Frontend Results Display Styles
- * Version: 0.2.0
- * Theme-friendly, responsive design
+ * Bold Metrics Integration - Frontend Styles
+ * Version: 0.3.0
+ * Dark tactical theme with professional clean design
  */
 
 /* ===================================
-   Container and Layout
+   CSS Custom Properties (Theme)
+   =================================== */
+:root {
+    --bm-primary: #1a1a2e;
+    --bm-primary-dark: #0f0f1a;
+    --bm-secondary: #16213e;
+    --bm-accent: #e94560;
+    --bm-accent-hover: #ff6b6b;
+    --bm-success: #00bf63;
+    --bm-warning: #f39c12;
+    --bm-error: #e74c3c;
+    --bm-text-light: #ffffff;
+    --bm-text-muted: #a0a0a0;
+    --bm-border: #2d2d44;
+    --bm-input-bg: #0f0f1a;
+    --bm-card-bg: #1a1a2e;
+    --bm-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --bm-radius: 4px;
+    --bm-radius-lg: 8px;
+}
+
+/* ===================================
+   Form Container
+   =================================== */
+.bm-form-container {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* ===================================
+   Form Header
+   =================================== */
+.bm-form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--bm-border);
+}
+
+.bm-form-header h2 {
+    color: var(--bm-text-light);
+    font-size: 1.75em;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
+}
+
+.bm-form-header p {
+    color: var(--bm-text-muted);
+    font-size: 0.95em;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ===================================
+   Main Form
+   =================================== */
+.bm-form {
+    background: var(--bm-card-bg);
+    padding: 35px;
+    border-radius: var(--bm-radius-lg);
+    box-shadow: var(--bm-shadow);
+    border: 1px solid var(--bm-border);
+}
+
+/* ===================================
+   Form Groups
+   =================================== */
+.bm-form-group {
+    margin-bottom: 24px;
+}
+
+.bm-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.bm-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--bm-text-light);
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bm-form-group .required {
+    color: var(--bm-accent);
+    margin-left: 2px;
+}
+
+.bm-form-group .bm-help-text {
+    font-size: 0.8em;
+    color: var(--bm-text-muted);
+    margin-top: 6px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* ===================================
+   Input Fields
+   =================================== */
+.bm-form-group input[type="number"],
+.bm-form-group input[type="text"],
+.bm-form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bm-input-bg);
+    border: 2px solid var(--bm-border);
+    border-radius: var(--bm-radius);
+    color: var(--bm-text-light);
+    font-size: 1em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.bm-form-group input[type="number"]:focus,
+.bm-form-group input[type="text"]:focus,
+.bm-form-group select:focus {
+    outline: none;
+    border-color: var(--bm-accent);
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+.bm-form-group input::placeholder {
+    color: var(--bm-text-muted);
+    opacity: 0.7;
+}
+
+/* Remove number input spinners */
+.bm-form-group input[type="number"]::-webkit-outer-spin-button,
+.bm-form-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.bm-form-group input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* ===================================
+   Height Input (Feet + Inches)
+   =================================== */
+.bm-height-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+.bm-height-inputs .bm-height-field {
+    flex: 1;
+    position: relative;
+}
+
+.bm-height-inputs input {
+    padding-right: 45px;
+}
+
+.bm-height-inputs .bm-unit {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bm-text-muted);
+    font-size: 0.85em;
+    pointer-events: none;
+}
+
+/* ===================================
+   Sex Selection (Toggle Buttons)
+   =================================== */
+.bm-toggle-group {
+    display: flex;
+    gap: 0;
+    background: var(--bm-input-bg);
+    border-radius: var(--bm-radius);
+    border: 2px solid var(--bm-border);
+    overflow: hidden;
+}
+
+.bm-toggle-group input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.bm-toggle-group label {
+    flex: 1;
+    padding: 14px 20px;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+    color: var(--bm-text-muted);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+    border-right: 1px solid var(--bm-border);
+}
+
+.bm-toggle-group label:last-of-type {
+    border-right: none;
+}
+
+.bm-toggle-group label:hover {
+    background: rgba(233, 69, 96, 0.1);
+    color: var(--bm-text-light);
+}
+
+.bm-toggle-group input[type="radio"]:checked + label {
+    background: var(--bm-accent);
+    color: var(--bm-text-light);
+}
+
+.bm-toggle-group input[type="radio"]:focus + label {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* ===================================
+   Conditional Fields
+   =================================== */
+.bm-conditional-fields {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(233, 69, 96, 0.05);
+    border-left: 3px solid var(--bm-accent);
+    border-radius: 0 var(--bm-radius) var(--bm-radius) 0;
+}
+
+.bm-conditional-fields .bm-form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Bra size inline fields */
+.bm-bra-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+.bm-bra-inputs .bm-bra-field {
+    flex: 1;
+}
+
+.bm-bra-inputs select {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bm-input-bg);
+    border: 2px solid var(--bm-border);
+    border-radius: var(--bm-radius);
+    color: var(--bm-text-light);
+    font-size: 1em;
+    cursor: pointer;
+}
+
+/* ===================================
+   Submit Button
+   =================================== */
+.bm-submit-btn {
+    width: 100%;
+    padding: 16px 30px;
+    background: var(--bm-accent);
+    color: var(--bm-text-light);
+    border: none;
+    border-radius: var(--bm-radius);
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bm-submit-btn:hover:not(:disabled) {
+    background: var(--bm-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+}
+
+.bm-submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.bm-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading state */
+.bm-submit-btn.bm-loading {
+    color: transparent;
+}
+
+.bm-submit-btn.bm-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top-color: var(--bm-text-light);
+    border-radius: 50%;
+    animation: bm-spin 0.8s linear infinite;
+}
+
+@keyframes bm-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===================================
+   Messages
+   =================================== */
+.bm-message {
+    padding: 14px 18px;
+    border-radius: var(--bm-radius);
+    margin-top: 20px;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bm-message::before {
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.bm-message.bm-success {
+    background: rgba(0, 191, 99, 0.1);
+    border: 1px solid var(--bm-success);
+    color: var(--bm-success);
+}
+
+.bm-message.bm-success::before {
+    content: '\2713';
+}
+
+.bm-message.bm-error {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--bm-error);
+    color: var(--bm-error);
+}
+
+.bm-message.bm-error::before {
+    content: '\2717';
+}
+
+/* ===================================
+   Results Container
+   =================================== */
+.bm-results {
+    background: var(--bm-card-bg);
+    padding: 35px;
+    border-radius: var(--bm-radius-lg);
+    box-shadow: var(--bm-shadow);
+    border: 1px solid var(--bm-border);
+    margin-top: 30px;
+}
+
+.bm-results h3 {
+    color: var(--bm-text-light);
+    margin: 0 0 25px 0;
+    font-size: 1.5em;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--bm-accent);
+}
+
+.bm-results h4 {
+    color: var(--bm-text-light);
+    margin: 30px 0 15px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===================================
+   Size Recommendations
+   =================================== */
+.bm-good-matches h4 {
+    margin-top: 0;
+}
+
+.bm-size-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.bm-size-list li {
+    padding: 20px 15px;
+    background: var(--bm-input-bg);
+    border: 2px solid var(--bm-border);
+    border-radius: var(--bm-radius);
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--bm-text-light);
+    transition: all 0.2s ease;
+}
+
+.bm-size-list li:hover {
+    border-color: var(--bm-accent);
+    background: rgba(233, 69, 96, 0.1);
+}
+
+.bm-size-list li .bm-fit-score {
+    display: block;
+    font-size: 0.75em;
+    color: var(--bm-success);
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.bm-no-matches {
+    text-align: center;
+    padding: 25px;
+    background: rgba(243, 156, 18, 0.1);
+    border: 1px solid var(--bm-warning);
+    border-radius: var(--bm-radius);
+    color: var(--bm-warning);
+}
+
+/* ===================================
+   Predicted Measurements
+   =================================== */
+.bm-predictions .bm-measurements {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bm-predictions .bm-measurements td {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bm-border);
+    color: var(--bm-text-light);
+}
+
+.bm-predictions .bm-measurements tr:last-child td {
+    border-bottom: none;
+}
+
+.bm-predictions .bm-measurements td:first-child {
+    font-weight: 500;
+    color: var(--bm-text-muted);
+    text-transform: capitalize;
+}
+
+.bm-predictions .bm-measurements td:last-child {
+    text-align: right;
+    font-weight: 600;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+@media (max-width: 600px) {
+    .bm-form-container {
+        padding: 15px;
+    }
+
+    .bm-form {
+        padding: 25px 20px;
+    }
+
+    .bm-form-header h2 {
+        font-size: 1.5em;
+    }
+
+    .bm-height-inputs {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .bm-bra-inputs {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .bm-toggle-group {
+        flex-direction: column;
+    }
+
+    .bm-toggle-group label {
+        border-right: none;
+        border-bottom: 1px solid var(--bm-border);
+    }
+
+    .bm-toggle-group label:last-of-type {
+        border-bottom: none;
+    }
+
+    .bm-results {
+        padding: 25px 20px;
+    }
+
+    .bm-size-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+    .bm-size-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    .bm-submit-btn,
+    .bm-size-list li,
+    .bm-form-group input,
+    .bm-toggle-group label {
+        transition: none;
+    }
+
+    .bm-submit-btn.bm-loading::after {
+        animation: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    :root {
+        --bm-border: #ffffff;
+        --bm-text-muted: #cccccc;
+    }
+
+    .bm-form,
+    .bm-results {
+        border-width: 2px;
+    }
+}
+
+/* Focus visible for keyboard users */
+.bm-form-group input:focus-visible,
+.bm-form-group select:focus-visible,
+.bm-submit-btn:focus-visible {
+    outline: 2px solid var(--bm-accent);
+    outline-offset: 2px;
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+@media print {
+    .bm-form-container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .bm-form {
+        box-shadow: none;
+        border: 1px solid #000;
+        background: #fff;
+    }
+
+    .bm-submit-btn {
+        display: none;
+    }
+
+    .bm-results {
+        box-shadow: none;
+        border: 1px solid #000;
+        background: #fff;
+    }
+
+    * {
+        color: #000 !important;
+        background: #fff !important;
+    }
+}
+
+/* ===================================
+   Legacy Results Page Styles
+   (For shortcode display)
    =================================== */
 .bm-result-page {
     max-width: 1000px;
@@ -13,25 +607,20 @@
     padding: 20px;
 }
 
-/* ===================================
-   Section Styling
-   =================================== */
 .bm-section {
     margin-bottom: 40px;
     padding: 30px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    background: var(--bm-card-bg);
+    border-radius: var(--bm-radius-lg);
+    box-shadow: var(--bm-shadow);
+    border: 1px solid var(--bm-border);
 }
 
-/* ===================================
-   Typography
-   =================================== */
 .bm-title {
     font-size: 2.5em;
     font-weight: 700;
     margin-bottom: 15px;
-    color: #1a1a1a;
+    color: var(--bm-text-light);
     text-align: center;
     line-height: 1.2;
 }
@@ -40,530 +629,38 @@
     font-size: 1.75em;
     font-weight: 600;
     margin-bottom: 20px;
-    color: #333;
-    border-bottom: 2px solid #4CAF50;
+    color: var(--bm-text-light);
+    border-bottom: 2px solid var(--bm-accent);
     padding-bottom: 10px;
 }
 
-/* ===================================
-   Hero Section
-   =================================== */
 .bm-hero {
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--bm-primary) 0%, var(--bm-secondary) 100%);
     border: none;
 }
 
 .bm-hero .bm-title {
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .bm-context {
     font-size: 1.1em;
     margin-top: 10px;
-    opacity: 0.95;
+    color: var(--bm-text-muted);
 }
 
-.bm-context strong {
-    font-weight: 600;
-}
-
-/* ===================================
-   Size Recommendation Cards
-   =================================== */
-.bm-size-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.bm-size-card {
-    background: #f8f9fa;
-    border: 2px solid #4CAF50;
-    border-radius: 12px;
-    padding: 25px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.bm-size-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.3);
-}
-
-.bm-size-label {
-    font-size: 1.75em;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 15px;
-}
-
-.bm-fit-score {
-    margin-top: 10px;
-}
-
-.bm-score-value {
-    font-size: 2em;
-    font-weight: 700;
-    color: #4CAF50;
-    display: block;
-    line-height: 1;
-}
-
-.bm-score-label {
-    font-size: 0.9em;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: block;
-    margin-top: 5px;
-}
-
-/* ===================================
-   Measurement Grid
-   =================================== */
-.bm-measurement-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.bm-measurement-item {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    transition: background 0.2s ease;
-}
-
-.bm-measurement-item:hover {
-    background: #e9ecef;
-}
-
-.bm-measurement-label {
-    font-size: 0.9em;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    font-weight: 500;
-}
-
-.bm-measurement-value {
-    font-size: 1.5em;
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-/* ===================================
-   No Results Message
-   =================================== */
-.bm-no-results {
-    text-align: center;
-    padding: 30px;
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    border-radius: 8px;
-    color: #856404;
-    font-size: 1.1em;
-}
-
-/* ===================================
-   Next Steps Section
-   =================================== */
-.bm-next-steps {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border: none;
-}
-
-.bm-next-steps p {
-    font-size: 1.1em;
-    line-height: 1.6;
-    color: #2c3e50;
-    margin: 0;
-}
-
-/* ===================================
-   Error Styling
-   =================================== */
 .bm-error {
-    background: #ffe5e5;
-    border-left: 4px solid #d32f2f;
+    background: rgba(231, 76, 60, 0.1);
+    border-left: 4px solid var(--bm-error);
     padding: 25px;
-    border-radius: 8px;
-    color: #b00020;
+    border-radius: var(--bm-radius);
+    color: var(--bm-error);
     margin: 20px 0;
-    box-shadow: 0 2px 8px rgba(211, 47, 47, 0.15);
 }
 
 .bm-error h3 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.5em;
-    color: #d32f2f;
-}
-
-.bm-error p {
-    margin-bottom: 10px;
-    line-height: 1.5;
-}
-
-.bm-error p:last-child {
-    margin-bottom: 0;
-}
-
-/* ===================================
-   Responsive Design
-   =================================== */
-@media (max-width: 768px) {
-    .bm-result-page {
-        padding: 15px;
-    }
-
-    .bm-section {
-        padding: 20px;
-        margin-bottom: 30px;
-    }
-
-    .bm-title {
-        font-size: 2em;
-    }
-
-    .bm-section-title {
-        font-size: 1.5em;
-    }
-
-    .bm-size-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .bm-measurement-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .bm-size-label {
-        font-size: 1.5em;
-    }
-
-    .bm-score-value {
-        font-size: 1.75em;
-    }
-
-    .bm-measurement-value {
-        font-size: 1.3em;
-    }
-}
-
-@media (max-width: 480px) {
-    .bm-result-page {
-        padding: 10px;
-    }
-
-    .bm-section {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .bm-title {
-        font-size: 1.75em;
-    }
-
-    .bm-context {
-        font-size: 1em;
-    }
-}
-
-/* ===================================
-   Print Styles
-   =================================== */
-@media print {
-    .bm-result-page {
-        max-width: 100%;
-        padding: 0;
-    }
-
-    .bm-section {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        page-break-inside: avoid;
-        margin-bottom: 20px;
-    }
-
-    .bm-hero {
-        background: #667eea !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .bm-size-card {
-        page-break-inside: avoid;
-    }
-
-    .bm-size-card:hover {
-        transform: none;
-        box-shadow: none;
-    }
-}
-
-/* ===================================
-   Accessibility
-   =================================== */
-.bm-size-card:focus,
-.bm-measurement-item:focus {
-    outline: 2px solid #4CAF50;
-    outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .bm-section {
-        border: 2px solid #000;
-    }
-
-    .bm-size-card {
-        border-width: 3px;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .bm-size-card {
-        transition: none;
-    }
-
-    .bm-size-card:hover {
-        transform: none;
-    }
-}
-
-/* ===================================
-   Form Styles
-   =================================== */
-.bm-form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.bm-form {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.bm-form-group {
-    margin-bottom: 20px;
-}
-
-.bm-form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
-    font-size: 1em;
-}
-
-.bm-form-group .required {
-    color: #d32f2f;
-}
-
-.bm-form-group input[type="number"],
-.bm-form-group input[type="text"] {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 1em;
-    transition: border-color 0.3s ease;
-    box-sizing: border-box;
-}
-
-.bm-form-group input[type="number"]:focus,
-.bm-form-group input[type="text"]:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.bm-radio-group {
-    display: flex;
-    gap: 20px;
-}
-
-.bm-radio-group label {
-    display: flex;
-    align-items: center;
-    font-weight: normal;
-    cursor: pointer;
-}
-
-.bm-radio-group input[type="radio"] {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.bm-conditional-fields {
-    border-left: 4px solid #667eea;
-    padding-left: 20px;
-    margin-top: 10px;
-    background: #f8f9fa;
-    padding: 15px 20px;
-    border-radius: 6px;
-}
-
-.bm-submit-btn {
-    width: 100%;
-    padding: 15px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.bm-submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-}
-
-.bm-submit-btn:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.bm-submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.bm-message {
-    padding: 15px 20px;
-    border-radius: 6px;
-    margin-top: 20px;
-    font-size: 1em;
-}
-
-.bm-message.bm-success {
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    color: #155724;
-}
-
-.bm-message.bm-error {
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-}
-
-.bm-results {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-top: 30px;
-}
-
-.bm-results h3 {
-    color: #333;
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.75em;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 10px;
-}
-
-.bm-results h4 {
-    color: #555;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    font-size: 1.3em;
-}
-
-.bm-good-matches {
-    margin-bottom: 25px;
-}
-
-.bm-size-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.bm-size-list li {
-    padding: 12px 15px;
-    background: #f8f9fa;
-    border-left: 4px solid #4CAF50;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    font-size: 1.1em;
-    transition: background 0.2s ease;
-}
-
-.bm-size-list li:hover {
-    background: #e9ecef;
-}
-
-.bm-no-matches {
-    text-align: center;
-    padding: 20px;
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    border-radius: 6px;
-    color: #856404;
-}
-
-.bm-predictions .bm-measurements {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.bm-predictions .bm-measurements td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.bm-predictions .bm-measurements tr:last-child td {
-    border-bottom: none;
-}
-
-.bm-predictions .bm-measurements td:first-child {
-    font-weight: 600;
-    color: #555;
-    width: 50%;
-}
-
-.bm-predictions .bm-measurements td:last-child {
-    color: #333;
-    text-align: right;
-}
-
-/* Form responsive styles */
-@media (max-width: 768px) {
-    .bm-form-container {
-        padding: 10px;
-    }
-
-    .bm-form {
-        padding: 20px;
-    }
-
-    .bm-results {
-        padding: 20px;
-    }
-
-    .bm-radio-group {
-        flex-direction: column;
-        gap: 10px;
-    }
 }

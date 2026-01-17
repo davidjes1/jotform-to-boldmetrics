@@ -3,7 +3,7 @@
  * Plugin Name: Bold Metrics Integration
  * Plugin URI: https://github.com/davidjes1/jotform-to-boldmetrics
  * Description: Integrates JotForm submissions with the Bold Metrics Virtual Sizer API. Provides a REST endpoint for webhooks, admin settings for API keys, and a shortcode to display results.
- * Version: 0.1.0
+ * Version: 0.3.0
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Jesse David
@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
  */
 final class BM_Integration
 {
-    const VERSION = '0.1.0';
+    const VERSION = '0.3.0';
     const OPTION_KEY = 'bm_integration_options';
 
     /**
@@ -487,54 +487,95 @@ final class BM_Integration
         ob_start();
         ?>
         <div class="bm-form-container">
+            <div class="bm-form-header">
+                <h2>Find Your Perfect Fit</h2>
+                <p>Enter your measurements below to get personalized size recommendations for your body armor.</p>
+            </div>
+
             <form id="bm-measurement-form" class="bm-form">
                 <div class="bm-form-group">
-                    <label for="bm-weight">Weight (lbs) <span class="required">*</span></label>
-                    <input type="number" id="bm-weight" name="weight" required min="1" step="0.1">
+                    <label>Sex <span class="required">*</span></label>
+                    <div class="bm-toggle-group">
+                        <input type="radio" name="sex" id="bm-sex-male" value="male" required>
+                        <label for="bm-sex-male">Male</label>
+                        <input type="radio" name="sex" id="bm-sex-female" value="female" required>
+                        <label for="bm-sex-female">Female</label>
+                    </div>
                 </div>
 
                 <div class="bm-form-group">
-                    <label for="bm-height">Height (inches) <span class="required">*</span></label>
-                    <input type="number" id="bm-height" name="height" required min="1" step="0.1">
+                    <label>Height <span class="required">*</span></label>
+                    <div class="bm-height-inputs">
+                        <div class="bm-height-field">
+                            <input type="number" id="bm-height-ft" name="height_ft" required min="3" max="8" placeholder="5">
+                            <span class="bm-unit">ft</span>
+                        </div>
+                        <div class="bm-height-field">
+                            <input type="number" id="bm-height-in" name="height_in" required min="0" max="11" placeholder="10">
+                            <span class="bm-unit">in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bm-form-group">
+                    <label for="bm-weight">Weight <span class="required">*</span></label>
+                    <input type="number" id="bm-weight" name="weight" required min="50" max="500" placeholder="180">
+                    <span class="bm-help-text">Enter your weight in pounds (lbs)</span>
                 </div>
 
                 <div class="bm-form-group">
                     <label for="bm-age">Age <span class="required">*</span></label>
-                    <input type="number" id="bm-age" name="age" required min="1" max="120">
-                </div>
-
-                <div class="bm-form-group">
-                    <label>Sex <span class="required">*</span></label>
-                    <div class="bm-radio-group">
-                        <label>
-                            <input type="radio" name="sex" value="male" required> Male
-                        </label>
-                        <label>
-                            <input type="radio" name="sex" value="female" required> Female
-                        </label>
-                    </div>
+                    <input type="number" id="bm-age" name="age" required min="18" max="100" placeholder="35">
                 </div>
 
                 <div id="bm-male-fields" class="bm-conditional-fields" style="display:none;">
                     <div class="bm-form-group">
-                        <label for="bm-waist">Waist Size (inches) <span class="required">*</span></label>
-                        <input type="number" id="bm-waist" name="waist" min="1" step="0.1">
+                        <label for="bm-waist">Waist Size <span class="required">*</span></label>
+                        <input type="number" id="bm-waist" name="waist" min="20" max="60" step="0.5" placeholder="34">
+                        <span class="bm-help-text">Measure around your natural waistline in inches</span>
                     </div>
                 </div>
 
                 <div id="bm-female-fields" class="bm-conditional-fields" style="display:none;">
                     <div class="bm-form-group">
-                        <label for="bm-strap">Strap Size <span class="required">*</span></label>
-                        <input type="text" id="bm-strap" name="strap_size" placeholder="e.g., 34">
-                    </div>
-                    <div class="bm-form-group">
-                        <label for="bm-cup">Cup Size <span class="required">*</span></label>
-                        <input type="text" id="bm-cup" name="cup_size" placeholder="e.g., C">
+                        <label>Bra Size <span class="required">*</span></label>
+                        <div class="bm-bra-inputs">
+                            <div class="bm-bra-field">
+                                <select id="bm-strap" name="strap_size">
+                                    <option value="">Band</option>
+                                    <option value="28">28</option>
+                                    <option value="30">30</option>
+                                    <option value="32">32</option>
+                                    <option value="34">34</option>
+                                    <option value="36">36</option>
+                                    <option value="38">38</option>
+                                    <option value="40">40</option>
+                                    <option value="42">42</option>
+                                    <option value="44">44</option>
+                                    <option value="46">46</option>
+                                </select>
+                            </div>
+                            <div class="bm-bra-field">
+                                <select id="bm-cup" name="cup_size">
+                                    <option value="">Cup</option>
+                                    <option value="AA">AA</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="DD">DD</option>
+                                    <option value="DDD">DDD</option>
+                                    <option value="E">E</option>
+                                    <option value="F">F</option>
+                                    <option value="G">G</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="bm-form-group">
-                    <button type="submit" class="bm-submit-btn">Get My Size Recommendations</button>
+                    <button type="submit" class="bm-submit-btn">Get My Size</button>
                 </div>
 
                 <div id="bm-form-message" class="bm-message" style="display:none;"></div>
@@ -557,11 +598,6 @@ final class BM_Integration
         $plugin_url = plugin_dir_url(__FILE__);
         $css_url = $plugin_url . 'assets/css/bm-style.css';
         $js_url = $plugin_url . 'assets/js/bm-form.js';
-
-        // Debug: Log the URLs being used (remove after testing)
-        error_log('BM Plugin URL: ' . $plugin_url);
-        error_log('BM CSS URL: ' . $css_url);
-        error_log('BM JS URL: ' . $js_url);
 
         wp_enqueue_style('bm-integration-style', $css_url, array(), self::VERSION);
         wp_enqueue_script('bm-integration-script', $js_url, array('jquery'), self::VERSION, true);

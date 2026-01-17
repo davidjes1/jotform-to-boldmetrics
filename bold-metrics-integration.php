@@ -38,6 +38,7 @@ final class BM_Integration
         add_action('admin_menu', array(__CLASS__, 'add_admin_menu'));
         add_action('admin_init', array(__CLASS__, 'register_settings'));
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
+        add_shortcode('boldmetrics_form', array(__CLASS__, 'shortcode_measurement_form'));
         add_shortcode('boldmetrics_result', array(__CLASS__, 'shortcode_show_result'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
     }
@@ -197,8 +198,13 @@ final class BM_Integration
                 submit_button();
                 ?>
             </form>
-            <h2>Webhook Endpoint</h2>
-            <p>Use this URL as your JotForm webhook endpoint (POST):</p>
+            <h2>Usage Instructions</h2>
+            <p>To add the measurement form to any page or post, use this shortcode:</p>
+            <pre>[boldmetrics_form]</pre>
+            <p>The form will collect user measurements and display size recommendations immediately.</p>
+
+            <h3>Legacy Webhook Endpoint (Optional)</h3>
+            <p>If you need webhook integration from external sources:</p>
             <pre><?php echo esc_url(rest_url('/boldmetrics/v1/process')); ?></pre>
             <p>If you set a webhook secret, include it in an <code>X-BM-Webhook-Secret</code> header on the POST.</p>
         </div>
@@ -213,6 +219,12 @@ final class BM_Integration
         register_rest_route('boldmetrics/v1', '/process', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array(__CLASS__, 'handle_webhook'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route('boldmetrics/v1', '/submit', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array(__CLASS__, 'handle_form_submission'),
             'permission_callback' => '__return_true',
         ));
     }
@@ -276,6 +288,75 @@ final class BM_Integration
         }
 
         return new WP_REST_Response(array('ok' => true, 'post_id' => $post_id, 'response' => $result), 200);
+    }
+
+    /**
+     * Handle form submission from frontend
+     *
+     * @param WP_REST_Request $request The REST request object
+     * @return WP_REST_Response Response object
+     */
+    public static function handle_form_submission(WP_REST_Request $request)
+    {
+        $params = $request->get_params();
+
+        // Validate and sanitize inputs
+        $weight = isset($params['weight']) ? floatval($params['weight']) : null;
+        $height = isset($params['height']) ? floatval($params['height']) : null;
+        $age = isset($params['age']) ? intval($params['age']) : null;
+        $sex = isset($params['sex']) ? sanitize_text_field($params['sex']) : null;
+
+        // Validate required fields
+        if (empty($weight) || empty($height) || empty($age) || empty($sex)) {
+            return new WP_REST_Response(array('error' => 'Please fill in all required fields'), 400);
+        }
+
+        // Build data array
+        $data = array(
+            'weight' => $weight,
+            'height' => $height,
+            'age' => $age,
+            'anon_id' => wp_generate_uuid4(),
+        );
+
+        // Handle sex-specific measurements
+        if (strtolower($sex) === 'male') {
+            $waist = isset($params['waist']) ? floatval($params['waist']) : null;
+            if (empty($waist)) {
+                return new WP_REST_Response(array('error' => 'Waist size is required for males'), 400);
+            }
+            $data['waist_circum_preferred'] = $waist;
+        } elseif (strtolower($sex) === 'female') {
+            $strap = isset($params['strap_size']) ? sanitize_text_field($params['strap_size']) : null;
+            $cup = isset($params['cup_size']) ? sanitize_text_field($params['cup_size']) : null;
+            if (empty($strap) || empty($cup)) {
+                return new WP_REST_Response(array('error' => 'Strap and cup size are required for females'), 400);
+            }
+            $data['bra_size'] = $strap . $cup;
+        } else {
+            return new WP_REST_Response(array('error' => 'Invalid sex value'), 400);
+        }
+
+        // Call Bold Metrics API
+        $result = self::call_boldmetrics_api($data);
+
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(array('error' => $result->get_error_message()), 500);
+        }
+
+        // Store result as private CPT for future retrieval
+        $post_id = wp_insert_post(array(
+            'post_type' => 'bm_result',
+            'post_title' => sprintf('BM Result: %s', $data['anon_id']),
+            'post_status' => 'publish',
+        ));
+
+        if ($post_id && !is_wp_error($post_id)) {
+            update_post_meta($post_id, 'bm_input', $data);
+            update_post_meta($post_id, 'bm_response', $result);
+        }
+
+        return new WP_REST_Response(array('success' => true, 'post_id' => $post_id, 'result' => $result), 200);
     }
 
     /**
@@ -396,11 +477,100 @@ final class BM_Integration
     }
 
     /**
-     * Enqueue plugin CSS assets
+     * Shortcode to display measurement input form
+     *
+     * @param array $atts Shortcode attributes
+     * @return string HTML output
+     */
+    public static function shortcode_measurement_form($atts)
+    {
+        ob_start();
+        ?>
+        <div class="bm-form-container">
+            <form id="bm-measurement-form" class="bm-form">
+                <div class="bm-form-group">
+                    <label for="bm-weight">Weight (lbs) <span class="required">*</span></label>
+                    <input type="number" id="bm-weight" name="weight" required min="1" step="0.1">
+                </div>
+
+                <div class="bm-form-group">
+                    <label for="bm-height">Height (inches) <span class="required">*</span></label>
+                    <input type="number" id="bm-height" name="height" required min="1" step="0.1">
+                </div>
+
+                <div class="bm-form-group">
+                    <label for="bm-age">Age <span class="required">*</span></label>
+                    <input type="number" id="bm-age" name="age" required min="1" max="120">
+                </div>
+
+                <div class="bm-form-group">
+                    <label>Sex <span class="required">*</span></label>
+                    <div class="bm-radio-group">
+                        <label>
+                            <input type="radio" name="sex" value="male" required> Male
+                        </label>
+                        <label>
+                            <input type="radio" name="sex" value="female" required> Female
+                        </label>
+                    </div>
+                </div>
+
+                <div id="bm-male-fields" class="bm-conditional-fields" style="display:none;">
+                    <div class="bm-form-group">
+                        <label for="bm-waist">Waist Size (inches) <span class="required">*</span></label>
+                        <input type="number" id="bm-waist" name="waist" min="1" step="0.1">
+                    </div>
+                </div>
+
+                <div id="bm-female-fields" class="bm-conditional-fields" style="display:none;">
+                    <div class="bm-form-group">
+                        <label for="bm-strap">Strap Size <span class="required">*</span></label>
+                        <input type="text" id="bm-strap" name="strap_size" placeholder="e.g., 34">
+                    </div>
+                    <div class="bm-form-group">
+                        <label for="bm-cup">Cup Size <span class="required">*</span></label>
+                        <input type="text" id="bm-cup" name="cup_size" placeholder="e.g., C">
+                    </div>
+                </div>
+
+                <div class="bm-form-group">
+                    <button type="submit" class="bm-submit-btn">Get My Size Recommendations</button>
+                </div>
+
+                <div id="bm-form-message" class="bm-message" style="display:none;"></div>
+            </form>
+
+            <div id="bm-results-container" class="bm-results" style="display:none;">
+                <h3>Your Size Recommendations</h3>
+                <div id="bm-results-content"></div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Enqueue plugin CSS and JavaScript assets
      */
     public static function enqueue_assets()
     {
-        wp_enqueue_style('bm-integration-style', plugin_dir_url(__FILE__) . 'assets/css/bm-style.css', array(), self::VERSION);
+        $plugin_url = plugin_dir_url(__FILE__);
+        $css_url = $plugin_url . 'assets/css/bm-style.css';
+        $js_url = $plugin_url . 'assets/js/bm-form.js';
+
+        // Debug: Log the URLs being used (remove after testing)
+        error_log('BM Plugin URL: ' . $plugin_url);
+        error_log('BM CSS URL: ' . $css_url);
+        error_log('BM JS URL: ' . $js_url);
+
+        wp_enqueue_style('bm-integration-style', $css_url, array(), self::VERSION);
+        wp_enqueue_script('bm-integration-script', $js_url, array('jquery'), self::VERSION, true);
+
+        // Localize script with REST API URL
+        wp_localize_script('bm-integration-script', 'bmData', array(
+            'restUrl' => rest_url('boldmetrics/v1/submit'),
+            'nonce' => wp_create_nonce('wp_rest')
+        ));
     }
 }
 

@@ -127,7 +127,7 @@
             .done(function(response) {
                 if (response.success && response.result) {
                     displayResults(response.result);
-                    $message.addClass('bm-success').text('Size recommendations calculated successfully!').show();
+                    $message.addClass('bm-success').text('Body measurements calculated successfully!').show();
                     // Smooth scroll to results
                     setTimeout(function() {
                         $('html, body').animate({
@@ -135,7 +135,7 @@
                         }, 400);
                     }, 100);
                 } else {
-                    showError('Unable to calculate size recommendations. Please try again.');
+                    showError('Unable to calculate body measurements. Please try again.');
                 }
             })
             .fail(function(xhr) {
@@ -173,39 +173,63 @@
         }
 
         /**
-         * Display API results in the results container
+         * Display Virtual Tailor API results in the results container
          */
         function displayResults(result) {
             let html = '';
 
-            // Display good matches
-            if (result.good_matches && result.good_matches.length > 0) {
-                html += '<div class="bm-good-matches">';
-                html += '<h4>Recommended Sizes</h4>';
-                html += '<ul class="bm-size-list">';
-                result.good_matches.forEach(function(match) {
-                    const displayTitle = match.brand_size || match.size || 'Unknown Size';
-                    const fitScore = match.fit_score ? '<span class="bm-fit-score">Fit: ' + escapeHtml(match.fit_score) + '%</span>' : '';
-                    html += '<li>' + escapeHtml(displayTitle) + fitScore + '</li>';
-                });
-                html += '</ul>';
+            // Display outlier warning if present
+            if (result.outlier === true) {
+                html += '<div class="bm-outlier-warning">';
+                html += '<p><strong>Warning:</strong> Some measurements may be inconsistent.</p>';
+                if (result.outlier_messages && result.outlier_messages.specifics && result.outlier_messages.specifics.length > 0) {
+                    html += '<ul>';
+                    result.outlier_messages.specifics.forEach(function(msg) {
+                        html += '<li>' + escapeHtml(msg.message || '') + '</li>';
+                    });
+                    html += '</ul>';
+                }
                 html += '</div>';
-            } else {
-                html += '<p class="bm-no-matches">No size recommendations available for your measurements.</p>';
             }
 
-            // Display predicted measurements
-            if (result.predictions && Object.keys(result.predictions).length > 0) {
+            // Display accuracy message if present
+            if (result.message && typeof result.message === 'string') {
+                html += '<p class="bm-accuracy-note"><em>' + escapeHtml(result.message) + '</em></p>';
+            }
+
+            // Display body dimensions from Virtual Tailor
+            if (result.dimensions && Object.keys(result.dimensions).length > 0) {
                 html += '<div class="bm-predictions">';
                 html += '<h4>Predicted Body Measurements</h4>';
                 html += '<table class="bm-measurements"><tbody>';
-                for (const key in result.predictions) {
-                    if (result.predictions.hasOwnProperty(key)) {
-                        const value = result.predictions[key];
-                        const formattedValue = typeof value === 'number' ? value.toFixed(1) + '"' : escapeHtml(value);
+                for (const key in result.dimensions) {
+                    if (result.dimensions.hasOwnProperty(key)) {
+                        const value = result.dimensions[key];
+                        const numValue = parseFloat(value);
+                        const formattedValue = !isNaN(numValue) ? numValue.toFixed(2) + ' in' : escapeHtml(value);
                         html += '<tr>';
                         html += '<td>' + escapeHtml(formatMeasurementName(key)) + '</td>';
                         html += '<td>' + formattedValue + '</td>';
+                        html += '</tr>';
+                    }
+                }
+                html += '</tbody></table>';
+                html += '</div>';
+            } else {
+                html += '<p class="bm-no-matches">No measurements returned. Please check your inputs.</p>';
+            }
+
+            // Display customer input summary
+            if (result.customer && Object.keys(result.customer).length > 0) {
+                html += '<div class="bm-input-summary-section">';
+                html += '<h4>Your Input Summary</h4>';
+                html += '<table class="bm-measurements bm-input-summary"><tbody>';
+                for (const key in result.customer) {
+                    if (result.customer.hasOwnProperty(key)) {
+                        const value = result.customer[key];
+                        html += '<tr>';
+                        html += '<td>' + escapeHtml(formatMeasurementName(key)) + '</td>';
+                        html += '<td>' + escapeHtml(value) + '</td>';
                         html += '</tr>';
                     }
                 }

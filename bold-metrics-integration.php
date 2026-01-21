@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bold Metrics Integration
  * Plugin URI: https://github.com/davidjes1/jotform-to-boldmetrics
- * Description: Integrates JotForm submissions with the Bold Metrics Virtual Sizer API. Provides a REST endpoint for webhooks, admin settings for API keys, and a shortcode to display results.
+ * Description: Integrates JotForm submissions with the Bold Metrics Virtual Tailor API. Provides a REST endpoint for webhooks, admin settings for API keys, and a shortcode to display body measurement predictions.
  * Version: 0.3.0
  * Requires at least: 5.0
  * Requires PHP: 7.4
@@ -250,17 +250,21 @@ final class BM_Integration
 
         $params = $request->get_params();
 
-        // Map/validate expected inputs. Adjust keys to match your JotForm field names.
+        // Map/validate expected inputs for Virtual Tailor API
         $data = array(
             'weight' => isset($params['weight']) ? floatval($params['weight']) : null,
             'height' => isset($params['height']) ? floatval($params['height']) : null,
             'age' => isset($params['age']) ? intval($params['age']) : null,
             'waist_circum_preferred' => isset($params['waist_circum_preferred']) ? floatval($params['waist_circum_preferred']) : null,
             'bra_size' => isset($params['bra_size']) ? sanitize_text_field($params['bra_size']) : null,
-            'desired_brand' => isset($params['desired_brand']) ? sanitize_text_field($params['desired_brand']) : null,
-            'desired_garment_type' => isset($params['desired_garment_type']) ? sanitize_text_field($params['desired_garment_type']) : null,
-            'product_id' => isset($params['product_id']) ? sanitize_text_field($params['product_id']) : null,
+            'gender' => isset($params['gender']) ? sanitize_text_field($params['gender']) : null,
             'anon_id' => isset($params['anon_id']) ? sanitize_text_field($params['anon_id']) : wp_generate_uuid4(),
+            // Additional optional Virtual Tailor parameters
+            'jean_inseam' => isset($params['jean_inseam']) ? floatval($params['jean_inseam']) : null,
+            'shoe_size_us' => isset($params['shoe_size_us']) ? floatval($params['shoe_size_us']) : null,
+            'chest_circum' => isset($params['chest_circum']) ? floatval($params['chest_circum']) : null,
+            'hip_circum' => isset($params['hip_circum']) ? floatval($params['hip_circum']) : null,
+            'neck_circum_base' => isset($params['neck_circum_base']) ? floatval($params['neck_circum_base']) : null,
         );
 
         // Ensure required fields exist (example: client requires height, weight, age, and either waist or bra_size)
@@ -311,7 +315,7 @@ final class BM_Integration
             return new WP_REST_Response(array('error' => 'Please fill in all required fields'), 400);
         }
 
-        // Build data array
+        // Build data array for Virtual Tailor
         $data = array(
             'weight' => $weight,
             'height' => $height,
@@ -319,14 +323,16 @@ final class BM_Integration
             'anon_id' => wp_generate_uuid4(),
         );
 
-        // Handle sex-specific measurements
+        // Handle sex-specific measurements and set gender for Virtual Tailor
         if (strtolower($sex) === 'male') {
+            $data['gender'] = 'm';
             $waist = isset($params['waist']) ? floatval($params['waist']) : null;
             if (empty($waist)) {
                 return new WP_REST_Response(array('error' => 'Waist size is required for males'), 400);
             }
             $data['waist_circum_preferred'] = $waist;
         } elseif (strtolower($sex) === 'female') {
+            $data['gender'] = 'w';
             $strap = isset($params['strap_size']) ? sanitize_text_field($params['strap_size']) : null;
             $cup = isset($params['cup_size']) ? sanitize_text_field($params['cup_size']) : null;
             if (empty($strap) || empty($cup)) {
@@ -360,7 +366,10 @@ final class BM_Integration
     }
 
     /**
-     * Call the Bold Metrics Virtual Sizer API
+     * Call the Bold Metrics Virtual Tailor API
+     *
+     * Predicts 50+ body measurements based on height, weight, age, and
+     * either waist_circum_preferred (males) or bra_size (females).
      *
      * @param array $data Measurement data to send to API
      * @return array|WP_Error API response or error object
@@ -375,7 +384,7 @@ final class BM_Integration
             return new WP_Error('missing_credentials', 'Bold Metrics credentials are not configured.');
         }
 
-        $endpoint = 'https://api.boldmetrics.io/virtualsizer/get';
+        $endpoint = 'https://api.boldmetrics.io/virtualtailor/get';
 
         $query = array(
             'client_id' => $client_id,
@@ -383,11 +392,10 @@ final class BM_Integration
             'height' => $data['height'],
             'weight' => $data['weight'],
             'age' => $data['age'],
-            'anon_id' => $data['anon_id'],
         );
 
-        // Add optional fields if provided
-        $optional_keys = array('waist_circum_preferred', 'bra_size', 'desired_brand', 'desired_garment_type', 'product_id');
+        // Add optional fields if provided (anon_id is optional for Virtual Tailor)
+        $optional_keys = array('anon_id', 'waist_circum_preferred', 'bra_size', 'gender', 'jean_inseam', 'shoe_size_us', 'jacket_size', 'sleeve', 'sleeve_type', 'chest_circum', 'fm_shoulder', 'hip_circum', 'overarm', 'sleeve_inseam', 'thigh', 'neck_circum_base', 'waist_circum_stomach', 'waist_height_preferred', 'locale');
         foreach ($optional_keys as $k) {
             if (!empty($data[$k])) {
                 $query[$k] = $data[$k];
@@ -396,17 +404,25 @@ final class BM_Integration
 
         $url = add_query_arg($query, $endpoint);
 
+        // Log the Virtual Tailor API request for debugging (remove in production)
+        error_log('Bold Metrics Virtual Tailor API Request URL: ' . $url);
+
         $response = wp_remote_get($url, array('timeout' => 15));
 
         if (is_wp_error($response)) {
+            error_log('Bold Metrics Virtual Tailor WP_Error: ' . $response->get_error_message());
             return $response;
         }
 
         $code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
 
+        // Log the Virtual Tailor response for debugging
+        error_log('Bold Metrics Virtual Tailor Response Code: ' . $code);
+        error_log('Bold Metrics Virtual Tailor Response Body: ' . $body);
+
         if (200 !== (int) $code) {
-            return new WP_Error('bm_api_error', sprintf('Bold Metrics returned HTTP %d: %s', $code, wp_trim_words($body, 30)));
+            return new WP_Error('bm_api_error', sprintf('Bold Metrics returned HTTP %d: %s', $code, $body));
         }
 
         $json = json_decode($body, true);
@@ -418,7 +434,7 @@ final class BM_Integration
     }
 
     /**
-     * Shortcode to display Bold Metrics results
+     * Shortcode to display Bold Metrics Virtual Tailor results
      *
      * @param array $atts Shortcode attributes
      * @return string HTML output
@@ -440,34 +456,49 @@ final class BM_Integration
 
         ob_start();
         echo '<div class="bm-result">';
-        echo '<h3>Size Recommendations</h3>';
+        echo '<h3>Predicted Body Measurements</h3>';
 
-        $good_matches = $response['good_matches'] ?? array();
-
-        if (!empty($good_matches)) {
-            echo '<ul class="bm-good-matches">';
-            foreach ($good_matches as $match) {
-                $brand_size = $match['brand_size'] ?? '';
-                $size = $match['size'] ?? 'Unknown Size';
-                $fit_score = $match['fit_score'] ?? '';
-
-                $display_title = !empty($brand_size) ? $brand_size : $size;
-                $score_str = !empty($fit_score) ? ' (Fit Score: ' . esc_html($fit_score) . ')' : '';
-
-                echo '<li>' . esc_html($display_title . $score_str) . '</li>';
+        // Check for outlier warnings
+        $outlier = $response['outlier'] ?? false;
+        if ($outlier) {
+            $outlier_messages = $response['outlier_messages'] ?? array();
+            echo '<div class="bm-outlier-warning">';
+            echo '<p><strong>Warning:</strong> Some measurements may be inconsistent.</p>';
+            if (!empty($outlier_messages['specifics'])) {
+                echo '<ul>';
+                foreach ($outlier_messages['specifics'] as $msg) {
+                    echo '<li>' . esc_html($msg['message'] ?? '') . '</li>';
+                }
+                echo '</ul>';
             }
-            echo '</ul>';
-        } else {
-            echo '<p>No recommended sizes returned.</p>';
+            echo '</div>';
         }
 
-        // Display predicted measurements
-        $predictions = $response['predictions'] ?? array();
-        if (!empty($predictions) && is_array($predictions)) {
-            echo '<h4>Predicted Measurements</h4>';
+        // Display body dimensions from Virtual Tailor
+        $dimensions = $response['dimensions'] ?? array();
+        if (!empty($dimensions) && is_array($dimensions)) {
             echo '<table class="bm-measurements"><tbody>';
-            foreach ($predictions as $key => $val) {
-                echo '<tr><td>' . esc_html($key) . '</td><td>' . esc_html($val) . '</td></tr>';
+            foreach ($dimensions as $key => $val) {
+                // Format the key for display (replace underscores with spaces, capitalize)
+                $display_key = ucwords(str_replace('_', ' ', $key));
+                // Format value to 2 decimal places if numeric
+                $display_val = is_numeric($val) ? number_format((float)$val, 2) . ' in' : $val;
+                echo '<tr><td>' . esc_html($display_key) . '</td><td>' . esc_html($display_val) . '</td></tr>';
+            }
+            echo '</tbody></table>';
+        } else {
+            echo '<p>No measurements returned.</p>';
+        }
+
+        // Display customer input echo if present
+        $customer = $response['customer'] ?? array();
+        if (!empty($customer) && is_array($customer)) {
+            echo '<h4>Input Summary</h4>';
+            echo '<table class="bm-measurements bm-input-summary"><tbody>';
+            foreach ($customer as $key => $val) {
+                $display_key = ucwords(str_replace('_', ' ', $key));
+                $display_val = is_numeric($val) ? number_format((float)$val, 2) : $val;
+                echo '<tr><td>' . esc_html($display_key) . '</td><td>' . esc_html($display_val) . '</td></tr>';
             }
             echo '</tbody></table>';
         }
@@ -582,7 +613,7 @@ final class BM_Integration
             </form>
 
             <div id="bm-results-container" class="bm-results" style="display:none;">
-                <h3>Your Size Recommendations</h3>
+                <h3>Your Body Measurements</h3>
                 <div id="bm-results-content"></div>
             </div>
         </div>
